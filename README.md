@@ -1,12 +1,12 @@
 # AI週報.EXE
 
-> 每週自動彙整中文 AI 新聞，賽博龐克像素風格，部署於 Cloudflare Workers。
+> 每週自動彙整中文 AI 新聞，賽博龐克像素風格，部署於 Cloudflare Pages。
 
 ---
 
 ## 功能
 
-- 每週一 08:00（台灣時間）自動抓取 AI 新聞
+- 每週自動抓取 AI 新聞（透過 `/api/refresh` 觸發）
 - 來源：機器之心、量子位、36氪、科技新報、iThome
 - 自動分類：大模型 / 研究突破 / 產業動態 / 政策法規 / 工具應用
 - 右側側欄可切換歷史週報
@@ -16,47 +16,66 @@
 ## 技術架構
 
 ```
-Cloudflare Cron（每週一 00:00 UTC）
-    ↓
-Worker 抓取 RSS → 過濾 AI 相關 → 自動分類
+外部 Cron（cron-job.org，每週一觸發）
+    ↓ 呼叫 /api/refresh?secret=xxx
+Pages Function 抓取 RSS → 過濾 AI 相關 → 自動分類
     ↓
 Cloudflare KV 儲存週報 JSON
     ↓
-Worker 接收請求 → 從 KV 讀取 → 回傳 HTML
+Pages Function 接收請求 → 從 KV 讀取 → 回傳 HTML
 ```
 
 ## 部署步驟
 
-**1. 安裝依賴**
-```bash
-npm install
+### 1. Cloudflare Pages 連接 GitHub
+
+Cloudflare Dashboard → Workers & Pages → Create → Pages → Connect to Git
+- 選擇此 repo
+- Build command：留空
+- Build output directory：`public`
+
+### 2. 建立 KV Namespace
+
+Cloudflare Dashboard → Workers & Pages → KV → Create namespace
+- 名稱：`GWP_WEEKLY`
+- 複製 Namespace ID
+
+### 3. 綁定 KV 到 Pages
+
+Pages 專案 → Settings → Functions → KV namespace bindings
+- Variable name：`GWP_WEEKLY`
+- KV namespace：選剛建立的
+
+### 4. 設定環境變數
+
+Pages 專案 → Settings → Environment variables
+- `REFRESH_SECRET` = 自訂一個密鑰（例如 `my-secret-2024`）
+
+### 5. 設定每週自動更新
+
+至 [cron-job.org](https://cron-job.org)（免費）建立排程任務：
+- URL：`https://你的網址.pages.dev/api/refresh?secret=你的密鑰`
+- 排程：每週一 08:00（台灣時間 = UTC 00:00）
+- `0 0 * * 1`
+
+### 6. 手動觸發第一次更新
+
+瀏覽器開啟：
+```
+https://你的網址.pages.dev/api/refresh?secret=你的密鑰
 ```
 
-**2. 登入 Cloudflare**
-```bash
-npx wrangler login
-```
+## 檔案結構
 
-**3. 建立 KV Namespace**
-```bash
-npx wrangler kv:namespace create GWP_WEEKLY
 ```
-將輸出的 `id` 填入 `wrangler.toml`：
-```toml
-[[kv_namespaces]]
-binding = "GWP_WEEKLY"
-id = "貼上你的 id"
-```
-
-**4. 部署**
-```bash
-npx wrangler deploy
-```
-
-## 本機開發
-
-```bash
-npx wrangler dev
+gwpweekly/
+├── functions/
+│   └── [[path]].js   # Pages Function 主程式
+├── public/
+│   └── .gitkeep      # Cloudflare Pages 需要此目錄
+├── package.json
+├── .gitignore
+└── README.md
 ```
 
 ## 新聞來源
@@ -68,13 +87,3 @@ npx wrangler dev
 | 36氪 | 科技商業 |
 | 科技新報 | 台灣科技媒體 |
 | iThome | 台灣 IT 媒體 |
-
-## 檔案結構
-
-```
-gwpweekly/
-├── worker.js       # Cloudflare Worker 主程式
-├── wrangler.toml   # Cloudflare 部署設定
-├── package.json
-└── .gitignore
-```
