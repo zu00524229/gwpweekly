@@ -8,9 +8,9 @@
 const RSS_SOURCES = [
   { name: '機器之心', url: 'https://www.jiqizhixin.com/rss' },
   { name: '量子位',   url: 'https://www.qbitai.com/feed' },
-  { name: '36氪',    url: 'https://36kr.com/feed' },
+  { name: '新智元',   url: 'https://www.aiyjs.com/feed' },
+  { name: 'AI科技評論', url: 'https://aitechtalk.io/feed' },
   { name: '科技新報', url: 'https://technews.tw/feed' },
-  { name: 'iThome',  url: 'https://www.ithome.com.tw/rss' },
 ];
 
 const AI_KEYWORDS = [
@@ -20,12 +20,12 @@ const AI_KEYWORDS = [
 ];
 
 const MODEL_TAGS = {
-  'Claude':   ['Claude', 'Anthropic', 'claude-'],
-  'GPT':      ['GPT', 'ChatGPT', 'OpenAI', 'o1', 'o3', 'o4', 'Sora'],
-  'Gemini':   ['Gemini', 'Google AI', 'Bard', 'DeepMind', 'Google DeepMind'],
-  'DeepSeek': ['DeepSeek', 'deepseek'],
-  'Llama':    ['Llama', 'Meta AI'],
-  'Grok':     ['Grok', 'xAI'],
+  'Claude':   ['Claude', 'Anthropic', 'claude-', '克勞德'],
+  'GPT':      ['GPT', 'ChatGPT', 'OpenAI', 'o1', 'o3', 'o4', 'Sora', '奧特曼', 'GPT-4', 'GPT-5', '4o', '山姆'],
+  'Gemini':   ['Gemini', 'Google AI', 'Bard', 'DeepMind', '谷歌AI', '谷歌大模型', 'Imagen', 'Veo'],
+  'DeepSeek': ['DeepSeek', 'deepseek', '深度求索', 'DeepSeek-R1', 'DeepSeek-V'],
+  'Llama':    ['Llama', 'Meta AI', 'Llama 3', 'Llama 4', 'Meta Llama'],
+  'Grok':     ['Grok', 'xAI', '馬斯克AI', 'Grok-'],
 };
 
 const MODEL_COLOR = {
@@ -35,7 +35,7 @@ const MODEL_COLOR = {
   'DeepSeek': '#a78bfa',
   'Llama':    '#ffd700',
   'Grok':     '#ff2d78',
-  '其他':     '#3a3a6a',
+  '通用AI':   '#4a4a7a',
 };
 
 // ── Pages Function 入口 ────────────────────────
@@ -156,7 +156,7 @@ function getTags(title = '', desc = '') {
   const matched = Object.entries(MODEL_TAGS)
     .filter(([, kws]) => kws.some(k => text.toLowerCase().includes(k.toLowerCase())))
     .map(([model]) => model);
-  return matched.length ? matched : ['其他'];
+  return matched.length ? matched : ['通用AI'];
 }
 
 function cleanText(html = '') {
@@ -304,7 +304,7 @@ hr{border:none;border-top:2px solid #1e1e4a;margin:16px 0}
       <button class="tag" data-filter="DeepSeek" onclick="filterTag(this)" style="--tc:#a78bfa">◈ DeepSeek</button>
       <button class="tag" data-filter="Llama"    onclick="filterTag(this)" style="--tc:#ffd700">◈ Llama</button>
       <button class="tag" data-filter="Grok"     onclick="filterTag(this)" style="--tc:#ff2d78">◈ Grok</button>
-      <button class="tag" data-filter="其他"     onclick="filterTag(this)" style="--tc:#3a3a6a">◈ 其他</button>
+      <button class="tag" data-filter="通用AI"    onclick="filterTag(this)" style="--tc:#4a4a7a">◈ 通用AI</button>
     </div>
     ${articleHTML}
   </main>
@@ -321,7 +321,7 @@ function filterTag(btn) {
   btn.classList.add('active');
   const filter = btn.dataset.filter;
   document.querySelectorAll('.article').forEach(a => {
-    const tags = JSON.parse(a.dataset.tags || '["其他"]');
+    const tags = JSON.parse(a.dataset.tags || '["通用AI"]');
     a.style.display = (filter === 'all' || tags.includes(filter)) ? 'flex' : 'none';
   });
 }
