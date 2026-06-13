@@ -41,25 +41,35 @@ export async function onRequest(context) {
   const { request, env } = context;
   const url = new URL(request.url);
 
-  // /api/refresh — 觸發 RSS 抓取
-  if (url.pathname === '/api/refresh') {
-    try {
-      await fetchAndStore(env);
-      return new Response('OK — 新聞已更新', { status: 200 });
-    } catch (e) {
-      return new Response(`Error: ${e.message}`, { status: 500 });
+  try {
+    if (!env.GWP_WEEKLY) {
+      return new Response(
+        '尚未綁定 KV Namespace。\n請至 Cloudflare Pages → Settings → Functions → KV namespace bindings\n新增 Variable name = GWP_WEEKLY',
+        { status: 500, headers: { 'Content-Type': 'text/plain; charset=utf-8' } }
+      );
     }
+
+    // /api/refresh — 觸發 RSS 抓取
+    if (url.pathname === '/api/refresh') {
+      await fetchAndStore(env);
+      return new Response('OK — 新聞已更新', { status: 200, headers: { 'Content-Type': 'text/plain; charset=utf-8' } });
+    }
+
+    // / 或 /?week=xxx — 顯示週報
+    const weekKey  = url.searchParams.get('week');
+    const index    = (await env.GWP_WEEKLY.get('weeks-index', { type: 'json' })) || [];
+    const current  = weekKey || index[0]?.key || null;
+    const weekData = current ? await env.GWP_WEEKLY.get(current, { type: 'json' }) : null;
+
+    return new Response(renderHTML(weekData, index, current), {
+      headers: { 'Content-Type': 'text/html; charset=utf-8' },
+    });
+  } catch (e) {
+    return new Response(`Error: ${e.message}\n\n${e.stack}`, {
+      status: 500,
+      headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+    });
   }
-
-  // / 或 /?week=xxx — 顯示週報
-  const weekKey = url.searchParams.get('week');
-  const index   = (await env.GWP_WEEKLY.get('weeks-index', { type: 'json' })) || [];
-  const current = weekKey || index[0]?.key || null;
-  const weekData = current ? await env.GWP_WEEKLY.get(current, { type: 'json' }) : null;
-
-  return new Response(renderHTML(weekData, index, current), {
-    headers: { 'Content-Type': 'text/html; charset=utf-8' },
-  });
 }
 
 // ── RSS 抓取與儲存 ─────────────────────────────
