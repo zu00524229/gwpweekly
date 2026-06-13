@@ -90,11 +90,9 @@ async function fetchAndStore(env) {
       const xml = await res.text();
       for (const item of parseItems(xml)) {
         if (isAI(item.title, item.desc)) {
-          const full = cleanText(item.desc);
           articles.push({
             title:    item.title,
-            summary:  full.slice(0, 160).trimEnd() + '…',
-            fullText: full.slice(0, 800),
+            summary:  cleanText(item.desc).slice(0, 160).trimEnd() + '…',
             source:   src.name,
             date:     fmtDate(item.pubDate),
             url:      item.link,
@@ -198,27 +196,20 @@ function renderHTML(weekData, index, currentKey) {
     : '◆ 本週資料更新中，請稍候…';
 
   const articleHTML = articles.length
-    ? articles.map(a => {
-        const color = CAT_COLOR[a.category] || '#00f0ff';
-        return `
-      <div class="article" onclick="toggleArticle(this)">
+    ? articles.map(a => `
+      <a class="article" href="${esc(a.url)}" target="_blank" rel="noopener">
         <div class="article-num">${String(a.id).padStart(2, '0')}</div>
         <div class="article-body">
-          <div class="article-cat" style="color:${color};text-shadow:0 0 8px ${color}">◈ ${a.category}</div>
+          <div class="article-cat" style="color:${CAT_COLOR[a.category]||'#00f0ff'};text-shadow:0 0 8px ${CAT_COLOR[a.category]||'#00f0ff'}">◈ ${a.category}</div>
           <h3>${esc(a.title)}</h3>
-          <p class="summary-short">${esc(a.summary)}</p>
-          <div class="summary-full">
-            <p class="full-text">${esc(a.fullText || a.summary)}</p>
-            <a class="read-btn" href="${esc(a.url)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">閱讀原文 ►</a>
-          </div>
+          <p>${esc(a.summary)}</p>
           <div class="article-meta">
             <span class="src">${esc(a.source)}</span>
             <span class="date">${esc(a.date)}</span>
-            <span class="expand-hint">▼ 展開閱讀</span>
+            <span class="read-more">閱讀原文 ►</span>
           </div>
         </div>
-      </div>`;
-      }).join('')
+      </a>`).join('')
     : '<div class="empty">本週尚無 AI 新聞。<br>請呼叫 /api/refresh 更新資料。</div>';
 
   const sidebarHTML = index.length
@@ -248,7 +239,7 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 .logo{font-family:'Press Start 2P',monospace;font-size:14px;color:#00f0ff;text-shadow:0 0 10px #00f0ff,0 0 20px #00f0ff;white-space:nowrap;text-decoration:none}
 .logo span{color:#ff2d78;text-shadow:0 0 10px #ff2d78}
 .ticker{flex:1;overflow:hidden;white-space:nowrap;border-left:2px solid #1e1e4a;padding-left:20px}
-.ticker-inner{display:inline-block;font-family:'Press Start 2P',monospace;font-size:11px;color:#ff2d78;text-shadow:0 0 6px #ff2d78;animation:ticker 40s linear infinite}
+.ticker-inner{display:inline-block;font-family:'Press Start 2P',monospace;font-size:11px;color:#ff2d78;text-shadow:0 0 6px #ff2d78;animation:ticker 80s linear infinite}
 @keyframes ticker{0%{transform:translateX(80vw)}100%{transform:translateX(-100%)}}
 .layout{display:grid;grid-template-columns:1fr 240px;max-width:1080px;margin:0 auto;padding:28px 20px;align-items:start}
 .main{padding-right:28px}
@@ -283,18 +274,6 @@ hr{border:none;border-top:2px solid #1e1e4a;margin:16px 0}
 .online-badge{font-family:'Press Start 2P',monospace;font-size:10px;color:#34d399;text-shadow:0 0 6px #34d399;text-align:center}
 .blink{animation:blink 1s step-end infinite}
 @keyframes blink{50%{opacity:0}}
-/* 展開/收起 */
-.article{cursor:pointer}
-.summary-full{display:none;margin-top:4px;margin-bottom:14px;border-left:2px solid #1e1e4a;padding-left:14px}
-.article.expanded .summary-full{display:block}
-.article.expanded .summary-short{display:none}
-.article.expanded{border-color:#a78bfa;box-shadow:0 0 18px rgba(167,139,250,.25)}
-.full-text{font-size:14px;color:#c8c8f0;line-height:1.85;margin-bottom:16px}
-.read-btn{display:inline-block;font-family:'Press Start 2P',monospace;font-size:9px;color:#050510;background:#00f0ff;padding:8px 16px;text-decoration:none;transition:background .15s}
-.read-btn:hover{background:#fff}
-.expand-hint{font-family:'Press Start 2P',monospace;font-size:9px;color:#4a4a7a;margin-left:auto;transition:color .15s}
-.article:hover .expand-hint{color:#a78bfa}
-.article.expanded .expand-hint{color:#a78bfa}
 @media(max-width:700px){.layout{grid-template-columns:1fr}.sidebar{position:static;margin-top:32px}.main{padding-right:0}}
 </style>
 </head>
@@ -315,12 +294,6 @@ hr{border:none;border-top:2px solid #1e1e4a;margin:16px 0}
     <div class="online-badge"><span class="blink">█</span> SYSTEM ONLINE</div>
   </aside>
 </div>
-<script>
-function toggleArticle(el) {
-  const expanded = el.classList.toggle('expanded');
-  el.querySelector('.expand-hint').textContent = expanded ? '▲ 收起' : '▼ 展開閱讀';
-}
-</script>
 </body>
 </html>`;
 }
