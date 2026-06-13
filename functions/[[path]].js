@@ -195,7 +195,7 @@ function renderHTML(weekData, index, currentKey) {
 
   const articleHTML = articles.length
     ? articles.map(a => `
-      <a class="article" href="${esc(a.url)}" target="_blank" rel="noopener">
+      <a class="article" href="${esc(a.url)}" target="_blank" rel="noopener" data-category="${esc(a.category)}">
         <div class="article-num">${String(a.id).padStart(2, '0')}</div>
         <div class="article-body">
           <div class="article-cat" style="color:${CAT_COLOR[a.category]||'#00f0ff'};text-shadow:0 0 8px ${CAT_COLOR[a.category]||'#00f0ff'}">◈ ${a.category}</div>
@@ -272,6 +272,15 @@ hr{border:none;border-top:2px solid #1e1e4a;margin:16px 0}
 .online-badge{font-family:'Press Start 2P',monospace;font-size:10px;color:#34d399;text-shadow:0 0 6px #34d399;text-align:center}
 .blink{animation:blink 1s step-end infinite}
 @keyframes blink{50%{opacity:0}}
+/* Filter tags */
+.filter-bar{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:24px}
+.tag{font-family:'Press Start 2P',monospace;font-size:9px;padding:8px 14px;border:2px solid #1e1e4a;background:transparent;color:#4a4a7a;cursor:pointer;transition:all .15s;letter-spacing:1px}
+.tag:hover{border-color:#a78bfa;color:#a78bfa}
+.tag.active{border-color:#00f0ff;color:#00f0ff;text-shadow:0 0 6px #00f0ff;box-shadow:0 0 10px rgba(0,240,255,.25)}
+.tag[data-filter="研究突破"].active{border-color:#a78bfa;color:#a78bfa;text-shadow:0 0 6px #a78bfa;box-shadow:0 0 10px rgba(167,139,250,.25)}
+.tag[data-filter="模型動態"].active{border-color:#00f0ff;color:#00f0ff;text-shadow:0 0 6px #00f0ff}
+.tag[data-filter="酷炫展示"].active{border-color:#fb923c;color:#fb923c;text-shadow:0 0 6px #fb923c;box-shadow:0 0 10px rgba(251,146,60,.25)}
+.tag[data-filter="開源工具"].active{border-color:#34d399;color:#34d399;text-shadow:0 0 6px #34d399;box-shadow:0 0 10px rgba(52,211,153,.25)}
 @media(max-width:700px){.layout{grid-template-columns:1fr}.sidebar{position:static;margin-top:32px}.main{padding-right:0}}
 </style>
 </head>
@@ -283,6 +292,13 @@ hr{border:none;border-top:2px solid #1e1e4a;margin:16px 0}
 <div class="layout">
   <main class="main">
     <div class="week-title">▶ 第 ${week} 週 · ${dateRange}</div>
+    <div class="filter-bar">
+      <button class="tag active" data-filter="all" onclick="filterTag(this)">◈ 全部</button>
+      <button class="tag" data-filter="研究突破" onclick="filterTag(this)">◈ 研究突破</button>
+      <button class="tag" data-filter="模型動態" onclick="filterTag(this)">◈ 模型動態</button>
+      <button class="tag" data-filter="酷炫展示" onclick="filterTag(this)">◈ 酷炫展示</button>
+      <button class="tag" data-filter="開源工具" onclick="filterTag(this)">◈ 開源工具</button>
+    </div>
     ${articleHTML}
   </main>
   <aside class="sidebar">
@@ -292,6 +308,16 @@ hr{border:none;border-top:2px solid #1e1e4a;margin:16px 0}
     <div class="online-badge"><span class="blink">█</span> SYSTEM ONLINE</div>
   </aside>
 </div>
+<script>
+function filterTag(btn) {
+  document.querySelectorAll('.tag').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  const cat = btn.dataset.filter;
+  document.querySelectorAll('.article').forEach(a => {
+    a.style.display = (cat === 'all' || a.dataset.category === cat) ? 'flex' : 'none';
+  });
+}
+</script>
 </body>
 </html>`;
 }
