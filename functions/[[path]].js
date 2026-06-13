@@ -20,19 +20,17 @@ const AI_KEYWORDS = [
 ];
 
 const CATEGORIES = {
-  '大模型':   ['GPT', 'Claude', 'Gemini', 'LLM', '大模型', '語言模型', 'Llama', 'Mistral', '文心', '通義', '豆包', 'Grok', 'DeepSeek', 'o1', 'o3', '推理模型'],
-  '研究突破': ['論文', 'arXiv', '研究', '突破', '架構', '實驗室', 'Transformer', '算法', '訓練', '參數'],
-  '產業動態': ['融資', '收購', '裁員', '上市', '晶片', '台積電', 'NVIDIA', '投資', '合作', '估值', '億元', '億美元'],
-  '政策法規': ['法規', '監管', '政策', '禁令', '合規', 'EU AI', '人工智慧法', '治理', '倫理', '草案'],
-  '工具應用': ['更新', '插件', 'API', '應用', '助理', '工具', '產品', '功能', '平台', '發布'],
+  '研究突破': ['論文', 'arXiv', '研究', '突破', '架構', '算法', '新方法', '超越', '首次', '實現', '發現', '效能', 'SOTA', '開源'],
+  '模型動態': ['GPT', 'Claude', 'Gemini', 'LLM', '大模型', 'Llama', 'Mistral', '文心', '通義', 'Grok', 'DeepSeek', 'o1', 'o3', '推理模型', '發布', '更新', '版本'],
+  '酷炫展示': ['展示', 'Demo', '演示', '機器人', '生成', '創作', '遊戲', '藝術', '影片', '音樂', '3D', '實驗', '挑戰', '趣', '神奇', '驚人'],
+  '開源工具': ['開源', 'GitHub', '工具', '框架', '插件', 'API', '部署', '本地', '免費', '專案', '套件'],
 };
 
 const CAT_COLOR = {
-  '大模型':   '#00f0ff',
   '研究突破': '#a78bfa',
-  '產業動態': '#34d399',
-  '政策法規': '#ffd700',
-  '工具應用': '#fb923c',
+  '模型動態': '#00f0ff',
+  '酷炫展示': '#fb923c',
+  '開源工具': '#34d399',
 };
 
 // ── Pages Function 入口 ────────────────────────
@@ -239,7 +237,7 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 .logo{font-family:'Press Start 2P',monospace;font-size:14px;color:#00f0ff;text-shadow:0 0 10px #00f0ff,0 0 20px #00f0ff;white-space:nowrap;text-decoration:none}
 .logo span{color:#ff2d78;text-shadow:0 0 10px #ff2d78}
 .ticker{flex:1;overflow:hidden;white-space:nowrap;border-left:2px solid #1e1e4a;padding-left:20px}
-.ticker-inner{display:inline-block;font-family:'Press Start 2P',monospace;font-size:11px;color:#ff2d78;text-shadow:0 0 6px #ff2d78;animation:ticker 80s linear infinite}
+.ticker-inner{display:inline-block;font-family:'Press Start 2P',monospace;font-size:11px;color:#ff2d78;text-shadow:0 0 6px #ff2d78;animation:ticker 150s linear infinite}
 @keyframes ticker{0%{transform:translateX(80vw)}100%{transform:translateX(-100%)}}
 .layout{display:grid;grid-template-columns:1fr 240px;max-width:1080px;margin:0 auto;padding:28px 20px;align-items:start}
 .main{padding-right:28px}
