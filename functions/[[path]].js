@@ -19,18 +19,23 @@ const AI_KEYWORDS = [
   '語言模型', 'Transformer', '算力', '推理模型', 'DeepSeek',
 ];
 
-const CATEGORIES = {
-  '研究突破': ['論文', 'arXiv', '研究', '突破', '架構', '算法', '新方法', '超越', '首次', '實現', '發現', '效能', 'SOTA', '開源'],
-  '模型動態': ['GPT', 'Claude', 'Gemini', 'LLM', '大模型', 'Llama', 'Mistral', '文心', '通義', 'Grok', 'DeepSeek', 'o1', 'o3', '推理模型', '發布', '更新', '版本'],
-  '酷炫展示': ['展示', 'Demo', '演示', '機器人', '生成', '創作', '遊戲', '藝術', '影片', '音樂', '3D', '實驗', '挑戰', '趣', '神奇', '驚人'],
-  '開源工具': ['開源', 'GitHub', '工具', '框架', '插件', 'API', '部署', '本地', '免費', '專案', '套件'],
+const MODEL_TAGS = {
+  'Claude':   ['Claude', 'Anthropic', 'claude-'],
+  'GPT':      ['GPT', 'ChatGPT', 'OpenAI', 'o1', 'o3', 'o4', 'Sora'],
+  'Gemini':   ['Gemini', 'Google AI', 'Bard', 'DeepMind', 'Google DeepMind'],
+  'DeepSeek': ['DeepSeek', 'deepseek'],
+  'Llama':    ['Llama', 'Meta AI'],
+  'Grok':     ['Grok', 'xAI'],
 };
 
-const CAT_COLOR = {
-  '研究突破': '#a78bfa',
-  '模型動態': '#00f0ff',
-  '酷炫展示': '#fb923c',
-  '開源工具': '#34d399',
+const MODEL_COLOR = {
+  'Claude':   '#fb923c',
+  'GPT':      '#34d399',
+  'Gemini':   '#00f0ff',
+  'DeepSeek': '#a78bfa',
+  'Llama':    '#ffd700',
+  'Grok':     '#ff2d78',
+  '其他':     '#3a3a6a',
 };
 
 // ── Pages Function 入口 ────────────────────────
@@ -89,12 +94,12 @@ async function fetchAndStore(env) {
       for (const item of parseItems(xml)) {
         if (isAI(item.title, item.desc)) {
           articles.push({
-            title:    item.title,
-            summary:  cleanText(item.desc).slice(0, 160).trimEnd() + '…',
-            source:   src.name,
-            date:     fmtDate(item.pubDate),
-            url:      item.link,
-            category: categorize(item.title, item.desc),
+            title:   item.title,
+            summary: cleanText(item.desc).slice(0, 160).trimEnd() + '…',
+            source:  src.name,
+            date:    fmtDate(item.pubDate),
+            url:     item.link,
+            tags:    getTags(item.title, item.desc),
           });
         }
       }
@@ -146,12 +151,12 @@ function isAI(title = '', desc = '') {
   return AI_KEYWORDS.some(k => t.includes(k.toLowerCase()));
 }
 
-function categorize(title = '', desc = '') {
-  const t = title + ' ' + desc;
-  for (const [cat, kws] of Object.entries(CATEGORIES)) {
-    if (kws.some(k => t.includes(k))) return cat;
-  }
-  return '工具應用';
+function getTags(title = '', desc = '') {
+  const text = title + ' ' + desc;
+  const matched = Object.entries(MODEL_TAGS)
+    .filter(([, kws]) => kws.some(k => text.toLowerCase().includes(k.toLowerCase())))
+    .map(([model]) => model);
+  return matched.length ? matched : ['其他'];
 }
 
 function cleanText(html = '') {
@@ -195,10 +200,10 @@ function renderHTML(weekData, index, currentKey) {
 
   const articleHTML = articles.length
     ? articles.map(a => `
-      <a class="article" href="${esc(a.url)}" target="_blank" rel="noopener" data-category="${esc(a.category)}">
+      <a class="article" href="${esc(a.url)}" target="_blank" rel="noopener" data-tags="${esc(JSON.stringify(a.tags || ['其他']))}">
         <div class="article-num">${String(a.id).padStart(2, '0')}</div>
         <div class="article-body">
-          <div class="article-cat" style="color:${CAT_COLOR[a.category]||'#00f0ff'};text-shadow:0 0 8px ${CAT_COLOR[a.category]||'#00f0ff'}">◈ ${a.category}</div>
+          <div class="tag-pills">${(a.tags || ['其他']).map(t => `<span class="pill" style="color:${MODEL_COLOR[t]||'#3a3a6a'};border-color:${MODEL_COLOR[t]||'#3a3a6a'}">${t}</span>`).join('')}</div>
           <h3>${esc(a.title)}</h3>
           <p>${esc(a.summary)}</p>
           <div class="article-meta">
@@ -275,12 +280,11 @@ hr{border:none;border-top:2px solid #1e1e4a;margin:16px 0}
 /* Filter tags */
 .filter-bar{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:24px}
 .tag{font-family:'Press Start 2P',monospace;font-size:9px;padding:8px 14px;border:2px solid #1e1e4a;background:transparent;color:#4a4a7a;cursor:pointer;transition:all .15s;letter-spacing:1px}
-.tag:hover{border-color:#a78bfa;color:#a78bfa}
-.tag.active{border-color:#00f0ff;color:#00f0ff;text-shadow:0 0 6px #00f0ff;box-shadow:0 0 10px rgba(0,240,255,.25)}
-.tag[data-filter="研究突破"].active{border-color:#a78bfa;color:#a78bfa;text-shadow:0 0 6px #a78bfa;box-shadow:0 0 10px rgba(167,139,250,.25)}
-.tag[data-filter="模型動態"].active{border-color:#00f0ff;color:#00f0ff;text-shadow:0 0 6px #00f0ff}
-.tag[data-filter="酷炫展示"].active{border-color:#fb923c;color:#fb923c;text-shadow:0 0 6px #fb923c;box-shadow:0 0 10px rgba(251,146,60,.25)}
-.tag[data-filter="開源工具"].active{border-color:#34d399;color:#34d399;text-shadow:0 0 6px #34d399;box-shadow:0 0 10px rgba(52,211,153,.25)}
+.tag:hover{border-color:var(--tc,#a78bfa);color:var(--tc,#a78bfa)}
+.tag.active{border-color:var(--tc,#00f0ff);color:var(--tc,#00f0ff);text-shadow:0 0 6px var(--tc,#00f0ff);box-shadow:0 0 10px rgba(0,240,255,.2)}
+/* Article tag pills */
+.tag-pills{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.pill{font-family:'Press Start 2P',monospace;font-size:8px;padding:4px 8px;border:1px solid;border-radius:0;opacity:.9}
 @media(max-width:700px){.layout{grid-template-columns:1fr}.sidebar{position:static;margin-top:32px}.main{padding-right:0}}
 </style>
 </head>
@@ -294,10 +298,13 @@ hr{border:none;border-top:2px solid #1e1e4a;margin:16px 0}
     <div class="week-title">▶ 第 ${week} 週 · ${dateRange}</div>
     <div class="filter-bar">
       <button class="tag active" data-filter="all" onclick="filterTag(this)">◈ 全部</button>
-      <button class="tag" data-filter="研究突破" onclick="filterTag(this)">◈ 研究突破</button>
-      <button class="tag" data-filter="模型動態" onclick="filterTag(this)">◈ 模型動態</button>
-      <button class="tag" data-filter="酷炫展示" onclick="filterTag(this)">◈ 酷炫展示</button>
-      <button class="tag" data-filter="開源工具" onclick="filterTag(this)">◈ 開源工具</button>
+      <button class="tag" data-filter="Claude"   onclick="filterTag(this)" style="--tc:#fb923c">◈ Claude</button>
+      <button class="tag" data-filter="GPT"      onclick="filterTag(this)" style="--tc:#34d399">◈ GPT</button>
+      <button class="tag" data-filter="Gemini"   onclick="filterTag(this)" style="--tc:#00f0ff">◈ Gemini</button>
+      <button class="tag" data-filter="DeepSeek" onclick="filterTag(this)" style="--tc:#a78bfa">◈ DeepSeek</button>
+      <button class="tag" data-filter="Llama"    onclick="filterTag(this)" style="--tc:#ffd700">◈ Llama</button>
+      <button class="tag" data-filter="Grok"     onclick="filterTag(this)" style="--tc:#ff2d78">◈ Grok</button>
+      <button class="tag" data-filter="其他"     onclick="filterTag(this)" style="--tc:#3a3a6a">◈ 其他</button>
     </div>
     ${articleHTML}
   </main>
@@ -312,9 +319,10 @@ hr{border:none;border-top:2px solid #1e1e4a;margin:16px 0}
 function filterTag(btn) {
   document.querySelectorAll('.tag').forEach(t => t.classList.remove('active'));
   btn.classList.add('active');
-  const cat = btn.dataset.filter;
+  const filter = btn.dataset.filter;
   document.querySelectorAll('.article').forEach(a => {
-    a.style.display = (cat === 'all' || a.dataset.category === cat) ? 'flex' : 'none';
+    const tags = JSON.parse(a.dataset.tags || '["其他"]');
+    a.style.display = (filter === 'all' || tags.includes(filter)) ? 'flex' : 'none';
   });
 }
 </script>
