@@ -46,23 +46,18 @@ Pages 專案 → Settings → Functions → KV namespace bindings
 - Variable name：`GWP_WEEKLY`
 - KV namespace：選剛建立的
 
-### 4. 設定環境變數
-
-Pages 專案 → Settings → Environment variables
-- `REFRESH_SECRET` = 自訂一個密鑰（例如 `my-secret-2024`）
-
-### 5. 設定每週自動更新
+### 4. 設定每週自動更新
 
 至 [cron-job.org](https://cron-job.org)（免費）建立排程任務：
-- URL：`https://你的網址.pages.dev/api/refresh?secret=你的密鑰`
+- URL：`https://你的網址.pages.dev/api/refresh`
 - 排程：每週一 08:00（台灣時間 = UTC 00:00）
-- `0 0 * * 1`
+- Cron：`0 0 * * 1`
 
-### 6. 手動觸發第一次更新
+### 5. 手動觸發第一次更新
 
 瀏覽器開啟：
 ```
-https://你的網址.pages.dev/api/refresh?secret=你的密鑰
+https://你的網址.pages.dev/api/refresh
 ```
 
 ## 檔案結構

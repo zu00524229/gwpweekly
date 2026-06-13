@@ -2,7 +2,7 @@
 //  AI週報.EXE — Cloudflare Pages Function
 //  GET /                → 顯示最新週報
 //  GET /?week=xxx       → 顯示指定週報
-//  GET /api/refresh     → 觸發 RSS 抓取（需帶 ?secret=）
+//  GET /api/refresh     → 觸發 RSS 抓取
 // ─────────────────────────────────────────────
 
 const RSS_SOURCES = [
@@ -43,10 +43,6 @@ export async function onRequest(context) {
 
   // /api/refresh — 觸發 RSS 抓取
   if (url.pathname === '/api/refresh') {
-    const secret = url.searchParams.get('secret');
-    if (!env.REFRESH_SECRET || secret !== env.REFRESH_SECRET) {
-      return new Response('Unauthorized', { status: 401 });
-    }
     try {
       await fetchAndStore(env);
       return new Response('OK — 新聞已更新', { status: 200 });
