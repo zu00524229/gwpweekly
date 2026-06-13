@@ -21,11 +21,11 @@ const AI_KEYWORDS = [
 
 const MODEL_TAGS = {
   'Claude':   ['Claude', 'Anthropic', 'claude-', '克勞德'],
-  'GPT':      ['GPT', 'ChatGPT', 'OpenAI', 'o1', 'o3', 'o4', 'Sora', '奧特曼', 'GPT-4', 'GPT-5', '4o', '山姆'],
-  'Gemini':   ['Gemini', 'Google AI', 'Bard', 'DeepMind', '谷歌AI', '谷歌大模型', 'Imagen', 'Veo'],
+  'GPT':      ['GPT', 'ChatGPT', 'OpenAI', 'Open AI', 'o1', 'o3', 'o4', 'Sora', '奧特曼', 'GPT-4', 'GPT-5', '4o', '山姆·奧特曼'],
+  'Gemini':   ['Gemini', 'Google AI', 'Bard', 'DeepMind', '谷歌', 'Google DeepMind', 'Imagen', 'Veo', '谷歌AI'],
   'DeepSeek': ['DeepSeek', 'deepseek', '深度求索', 'DeepSeek-R1', 'DeepSeek-V'],
-  'Llama':    ['Llama', 'Meta AI', 'Llama 3', 'Llama 4', 'Meta Llama'],
-  'Grok':     ['Grok', 'xAI', '馬斯克AI', 'Grok-'],
+  'Llama':    ['Llama', 'Meta AI', 'Meta', 'Facebook AI', 'Llama 3', 'Llama 4'],
+  'Grok':     ['Grok', 'xAI', '馬斯克', 'Elon Musk', 'Grok-'],
 };
 
 const MODEL_COLOR = {
